@@ -1,0 +1,284 @@
+---
+title: "Backend Development Guide"
+---
+
+This guide covers the backend development aspects of the Fit Schedule Planner project.
+
+## Tech Stack
+
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT with bcrypt
+- **File Handling**: Multer
+- **PDF Processing**: pdf-parse
+- **AI Integration**: OpenAI API
+- **Development**: Nodemon for hot reloading
+
+## Project Structure
+
+```bash
+server/
+├── routes/           # API route definitions
+│   ├── authRoutes.js    # Authentication endpoints
+│   ├── courseRoutes.js  # Course management
+│   ├── fileRoutes.js    # File upload/download
+│   └── programRoutes.js # Program management
+├── controllers/      # Business logic
+│   ├── authController.js    # Authentication logic
+│   ├── courseController.js  # Course operations
+│   ├── fileController.js    # File handling
+│   └── programController.js # Program operations
+├── models/          # Database schemas
+│   ├── user.js         # User model
+│   ├── course.js       # Course model
+│   └── transcript.js   # Transcript model
+├── services/        # Business services
+├── helpers/         # Utility functions
+├── index.js         # Application entry point
+└── .env            # Environment variables
+```
+
+## Server Configuration
+
+The server is configured in `index.js` with the following setup:
+- Express middleware for JSON parsing and URL encoding
+- CORS configuration for cross-origin requests
+- Cookie parser for JWT token handling
+- MongoDB connection with environment variables
+- Route mounting for different API endpoints
+- Server listening on port 8000
+
+## API Endpoints
+
+### Authentication (`/api/auth`)
+- `POST /register`: User registration
+  - Validates email and password
+  - Hashes password using bcrypt
+  - Creates JWT token
+  - Sets secure HTTP-only cookie
+- `POST /login`: User authentication
+  - Validates credentials
+  - Generates new JWT token
+  - Sets secure HTTP-only cookie
+- `POST /logout`: User logout
+  - Clears authentication cookie
+- `GET /verify`: Token verification
+  - Validates JWT token
+  - Returns user information
+
+### Courses (`/api/courses`)
+- `GET /`: Get all courses
+  - Returns paginated course list
+  - Includes basic course information
+- `GET /:id`: Get course by ID
+  - Returns detailed course information
+  - Includes section details
+- `GET /search`: Search courses
+  - Supports text search in course code and title
+  - Filters by day of week
+  - Case-insensitive search
+- `GET /prerequisites/:id`: Get course prerequisites
+  - Recursively finds all prerequisites
+  - Prevents infinite loops
+  - Returns prerequisite tree
+
+### Files (`/api/files`)
+- `POST /upload`: Upload transcript
+  - Validates PDF file type
+  - Processes transcript using pdf-parse
+  - Extracts course information
+  - Stores file in cloud storage
+- `GET /:id`: Get file by ID
+  - Returns file metadata
+  - Streams file content
+- `DELETE /:id`: Delete file
+  - Removes file from storage
+  - Updates database records
+
+### Programs (`/api/programs`)
+- `GET /`: Get all programs
+  - Returns program list
+  - Includes program requirements
+- `GET /:id`: Get program by ID
+  - Returns detailed program information
+  - Includes required courses
+- `GET /courses/:id`: Get program courses
+  - Returns all courses in program
+  - Includes course prerequisites
+
+## Data Models
+
+### User Model
+```javascript
+{
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['student', 'admin'], default: 'student' },
+  registeredCourses: [{ type: Schema.Types.ObjectId, ref: 'Course' }]
+}
+```
+
+### Course Model
+```javascript
+{
+  Course: { type: String, required: true, unique: true },
+  Credits: { type: String, required: true },
+  Title: { type: String, required: true },
+  Prerequisites: { type: String },
+  Requirements: { type: String },
+  Sections: [{
+    CRN: String,
+    Section: String,
+    Days: String,
+    Times: String,
+    Place: String,
+    Instructor: String,
+    Capacity: String,
+    CurrentEnrollment: { type: Number, default: 0 },
+    registeredUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  }]
+}
+```
+
+### Transcript Model
+```javascript
+{
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  fileUrl: { type: String, required: true },
+  processedData: {
+    courses: [{
+      code: String,
+      grade: String,
+      credits: Number
+    }],
+    gpa: Number,
+    totalCredits: Number
+  },
+  status: { 
+    type: String, 
+    enum: ['pending', 'processed', 'error'],
+    default: 'pending'
+  }
+}
+```
+
+## Security Implementation
+
+1. **Authentication**:
+   - JWT tokens stored in HTTP-only cookies
+   - Token expiration after 24 hours
+   - Password hashing with bcrypt (10 rounds)
+   - CSRF protection
+   - Rate limiting on auth endpoints
+
+2. **File Upload**:
+   - File type validation (PDF only)
+   - Size limit (10MB)
+   - Secure file storage
+   - Virus scanning
+   - User-specific file access
+
+3. **Environment Variables**:
+   ```bash
+   MONGO_URL=mongodb://localhost:27017/fit-planner
+   JWT_SECRET=your-secret-key
+   OPENAI_API_KEY=your-api-key
+   FILE_STORAGE_PATH=/path/to/storage
+   ```
+
+## Error Handling
+
+The backend implements a comprehensive error handling system:
+- Global error middleware
+- Custom error classes:
+  - `ValidationError`: Input validation failures
+  - `AuthenticationError`: Auth-related issues
+  - `DatabaseError`: Database operation failures
+  - `FileError`: File operation issues
+- HTTP status codes:
+  - 200: Success
+  - 400: Bad Request
+  - 401: Unauthorized
+  - 403: Forbidden
+  - 404: Not Found
+  - 500: Server Error
+- Error logging with stack traces
+- User-friendly error messages
+
+## Development Guidelines
+
+1. **Code Organization**:
+   - Follow MVC pattern strictly
+   - Keep controllers thin
+   - Move business logic to services
+   - Use middleware for cross-cutting concerns
+   - Implement proper error handling
+
+2. **Database Operations**:
+   - Use Mongoose models for all operations
+   - Implement proper indexing:
+     ```javascript
+     courseSchema.index({ Course: 1 });
+     courseSchema.index({ Title: 'text' });
+     ```
+   - Use transactions for multi-document operations
+   - Implement proper validation
+   - Use population for related documents
+
+3. **API Design**:
+   - Follow RESTful principles
+   - Use consistent response format:
+     ```javascript
+     {
+       success: boolean,
+       data: any,
+       message: string,
+       error: string
+     }
+     ```
+   - Implement proper input validation
+   - Use proper HTTP methods
+   - Version your API
+
+4. **Security**:
+   - Validate all inputs using Joi
+   - Sanitize user data
+   - Implement rate limiting:
+     ```javascript
+     const rateLimit = require('express-rate-limit');
+     const limiter = rateLimit({
+       windowMs: 15 * 60 * 1000,
+       max: 100
+     });
+     ```
+   - Use HTTPS in production
+   - Implement proper CORS
+
+5. **Testing**:
+   - Unit tests for controllers
+   - Integration tests for routes
+   - Mock external services
+   - Use test databases
+   - Implement CI/CD pipeline
+
+## Performance Optimization
+
+1. **Database**:
+   - Implement proper indexing
+   - Use lean queries when possible
+   - Implement caching
+   - Use aggregation pipeline
+
+2. **File Operations**:
+   - Stream large files
+   - Implement chunked uploads
+   - Use background processing
+   - Implement proper cleanup
+
+3. **API**:
+   - Implement pagination
+   - Use compression
+   - Cache responses
+   - Implement proper error handling

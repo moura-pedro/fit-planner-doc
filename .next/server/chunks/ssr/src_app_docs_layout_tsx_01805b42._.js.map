@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///Users/pedromoura/Documents/projects/fit-schedule-planner/documentation/fit-planner-doc/src/app/docs/layout.tsx"],"sourcesContent":["import { DocsLayout } from 'fumadocs-ui/layouts/docs';\nimport type { ReactNode } from 'react';\n \nexport default function Layout({ children }: { children: ReactNode }) {\n  return (\n    <DocsLayout\n      tree={{\n        name: 'docs',\n        children: [],\n      }}\n      // other props\n    >\n      {children}\n    </DocsLayout>\n  );\n}"],"names":[],"mappings":";;;;AAAA;AAAA;;;AAGe,SAAS,OAAO,EAAE,QAAQ,EAA2B;IAClE,qBACE,8OAAC,yKAAA,CAAA,aAAU;QACT,MAAM;YACJ,MAAM;YACN,UAAU,EAAE;QACd;kBAGC;;;;;;AAGP","debugId":null}}]
+}

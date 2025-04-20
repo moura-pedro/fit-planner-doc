@@ -1,0 +1,110 @@
+---
+title: "Frontend Development Guide"
+---
+
+This guide covers the frontend development aspects of the Fit Schedule Planner project.
+
+## Tech Stack
+
+- **Framework**: React with TypeScript  
+- **Styling**: Tailwind CSS  
+- **State Management**: React Context API  
+- **Routing**: React Router  
+- **HTTP Client**: Axios  
+- **Form Handling**: React Hook Form  
+- **PDF Processing**: pdf-lib  
+- **Testing**: Jest and React Testing Library  
+
+## Project Structure
+
+```bash
+client/
+├── src/
+│   ├── components/     # Reusable components
+│   │   ├── Navbar/     # Navigation component
+│   │   ├── FileUpload/ # File upload functionality
+│   │   ├── ProtectedRoute/ # Route protection
+│   │   ├── TranscriptViewer/ # Transcript display
+│   │   └── ui/        # UI components
+│   ├── pages/         # Page components
+│   │   ├── Dashboard/ # User dashboard
+│   │   ├── Home/      # Landing page
+│   │   ├── Login/     # Authentication
+│   │   ├── Register/  # User registration
+│   │   ├── Search/    # Course search
+│   │   └── PrerequisiteTree/ # Course prerequisites
+│   ├── context/       # Context providers
+│   │   └── userContext.jsx  # User authentication state
+│   ├── lib/          # Utility libraries
+│   ├── assets/       # Static assets
+│   └── styles/       # Global styles
+
+```
+
+## Key Components
+
+### Authentication
+- **Login/Register Pages**: Handle user authentication and registration
+- **ProtectedRoute**: Secures routes that require authentication
+- **userContext**: Manages global user state and authentication
+
+### Core Features
+- **FileUpload**: Handles transcript PDF upload and processing
+- **TranscriptViewer**: Displays and manages transcript data
+- **PrerequisiteTree**: Visualizes course prerequisites
+- **Search**: Course search functionality
+
+### UI Components
+- **Navbar**: Main navigation component
+- **ui/**: Reusable UI components (buttons, forms, etc.)
+
+## State Management
+
+The application uses React Context API for state management, primarily through:
+- `userContext.jsx`: Manages authentication state and user data
+
+## Routing
+
+The application uses React Router for navigation between different pages:
+- `/`: Home page
+- `/login`: Authentication
+- `/register`: User registration
+- `/dashboard`: User dashboard
+- `/search`: Course search
+- `/prerequisites`: Course prerequisite visualization
+
+## Styling
+
+The application uses Tailwind CSS for styling, providing:
+- Responsive design
+- Consistent UI components
+- Custom theme configuration
+
+## Testing
+
+The project includes:
+- Jest for unit testing
+- React Testing Library for component testing
+- Setup files in `setupTests.js`
+
+## Development Guidelines
+
+1. **Component Structure**:
+   - Keep components small and focused
+   - Use TypeScript for type safety
+   - Follow React best practices
+
+2. **State Management**:
+   - Use Context API for global state
+   - Keep component state local when possible
+   - Avoid prop drilling
+
+3. **Styling**:
+   - Use Tailwind utility classes
+   - Maintain consistent spacing and colors
+   - Ensure responsive design
+
+4. **Testing**:
+   - Write tests for critical components
+   - Maintain good test coverage
+   - Follow testing best practices
